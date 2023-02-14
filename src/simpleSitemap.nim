@@ -1,9 +1,8 @@
 import std/xmltree, times, uri, math, strformat, sequtils, os, algorithm
-# import print
 
 type
   UrlDate = tuple[url: string, dateChanged: Datetime]
-
+  Page = tuple[filename: string, content: XmlNode]
 
 func genLastModElem(dateChanged: Datetime): XmlNode =
     result = newElement("lastmod")
@@ -37,11 +36,10 @@ proc getMostRecentChange(urls: seq[UrlDate]): Datetime =
     if dateChanged > result:
       result = dateChanged
 
-type
-  Page = tuple[filename: string, content: XmlNode]
 
 proc cmpUrlDate(x, y: UrlDate): int =
   cmp(x.dateChanged, y.dateChanged)
+
 
 proc generateSitemaps*(urls: seq[UrlDate], urlsOnRecent = 10, maxUrlsPerSitemap = 50_000, base = "https://forum.nim-lang.org/"): seq[Page] =
   ## Generates sitemaps
@@ -49,8 +47,6 @@ proc generateSitemaps*(urls: seq[UrlDate], urlsOnRecent = 10, maxUrlsPerSitemap 
   var elemSitemapindex = newElement("sitemapindex")
   elemSitemapindex.attrs = {"xmlns": "http://www.sitemaps.org/schemas/sitemap/0.9"}.toXmlAttributes()
 
-  # print min(urls.len, urlsOnRecent)
-  # var recent = urls[0 ..< min(urls.len, urlsOnRecent)]
   let urlsSorted = sorted(urls, cmpUrlDate, SortOrder.Ascending)
   var recent = urlsSorted[^min(urls.len, urlsOnRecent) .. ^1]
   var elemSitemapRecent = newElement("sitemap")
@@ -65,7 +61,6 @@ proc generateSitemaps*(urls: seq[UrlDate], urlsOnRecent = 10, maxUrlsPerSitemap 
   var sitemapRecent = generateUrlset(recent)
   result.add ("sitemap_recent.xml", sitemapRecent)
 
-  # print urls.len, maxUrlsPerSitemap, urls.len / maxUrlsPerSitemap, (urls.len / maxUrlsPerSitemap).ceil
   let howManySitemaps = (urls.len / maxUrlsPerSitemap).ceil.int
   for idx, distUrls in urls.distribute(howManySitemaps, spread = false).pairs:
     var elemSitemap = newElement("sitemap")
@@ -82,11 +77,13 @@ proc generateSitemaps*(urls: seq[UrlDate], urlsOnRecent = 10, maxUrlsPerSitemap 
 
   result.add ("sitemap.xml", elemSitemapindex)
 
+
 proc write(pages: seq[Page], folder = getAppDir() / "sitemaps") =
   if not dirExists(folder):
     createDir(folder)
   for (filename, data) in pages:
     writeFile(folder / filename, $data)
+
 
 when isMainModule:
   var testUrls: seq[UrlDate] = @[
@@ -99,6 +96,5 @@ when isMainModule:
   for idx in 1 .. 100_000:
     testUrls.add (fmt"https://forum.nim-lang.org/t/{idx}", now())
   let pages = generateSitemaps(testUrls)
-  # echo pages
   write(pages)
 
