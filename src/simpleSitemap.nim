@@ -9,7 +9,7 @@ func genLastModElem(dateChanged: Datetime): XmlNode =
     # result.add newText(dateChanged.format("YYYY-MM-dd"))
     result.add newText($dateChanged)
 
-proc generateUrlset*(urls: seq[UrlDate]): XmlNode =
+func generateUrlset*(urls: seq[UrlDate]): XmlNode =
   var elemUrlset = newElement("urlset")
   elemUrlset.attrs = {
     "xmlns": "http://www.sitemaps.org/schemas/sitemap/0.9",
@@ -26,22 +26,21 @@ proc generateUrlset*(urls: seq[UrlDate]): XmlNode =
     var elemLastMod = genLastModElem(dateChanged)
     elemUrl.add elemLastMod
     elemUrlset.add elemUrl
-
   return elemUrlset
 
 
-proc getMostRecentChange(urls: seq[UrlDate]): Datetime =
+func getMostRecentChange(urls: seq[UrlDate]): Datetime =
   result = urls[0].dateChanged
   for (url, dateChanged) in urls:
     if dateChanged > result:
       result = dateChanged
 
 
-proc cmpUrlDate(x, y: UrlDate): int =
+func cmpUrlDate(x, y: UrlDate): int =
   cmp(x.dateChanged, y.dateChanged)
 
 
-proc generateSitemaps*(urls: seq[UrlDate], urlsOnRecent = 10, maxUrlsPerSitemap = 50_000, base = "https://forum.nim-lang.org/"): seq[Page] =
+func generateSitemaps*(urls: seq[UrlDate], urlsOnRecent = 10, maxUrlsPerSitemap = 50_000, base = "https://forum.nim-lang.org/"): seq[Page] =
   ## Generates sitemaps
   var baseUri = parseUri(base)
   var elemSitemapindex = newElement("sitemapindex")
