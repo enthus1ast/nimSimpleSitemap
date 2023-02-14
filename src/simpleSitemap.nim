@@ -1,8 +1,8 @@
 import std/xmltree, times, uri, math, strformat, sequtils, os, algorithm
 
 type
-  UrlDate = tuple[url: string, dateChanged: Datetime]
-  Page = tuple[filename: string, content: XmlNode]
+  UrlDate* = tuple[url: string, dateChanged: Datetime]
+  Page* = tuple[filename: string, content: XmlNode]
 
 func genLastModElem(dateChanged: Datetime): XmlNode =
     result = newElement("lastmod")
@@ -88,13 +88,35 @@ proc write(pages: seq[Page], folder = getAppDir() / "sitemaps") =
 when isMainModule:
   var testUrls: seq[UrlDate] = @[
     ("https://foo1.de", now() + 1.years),
-  #   ("https://foo2.de", now()),
-  #   ("https://foo3.de", now()),
-  #   ("https://foo4.de", now()),
-  #   ("https://foo5.de", now()),
+    ("https://foo2.de", now()),
+    ("https://foo3.de", now()),
+    ("https://foo4.de", now()),
+    ("https://foo5.de", now()),
   ]
+
+  ## Add even more test links
   for idx in 1 .. 100_000:
     testUrls.add (fmt"https://forum.nim-lang.org/t/{idx}", now())
-  let pages = generateSitemaps(testUrls)
+
+  let pages = generateSitemaps(
+    testUrls,
+    urlsOnRecent = 10,
+    maxUrlsPerSitemap = 50_000,
+    base = "https://forum.nim-lang.org/"
+  )
+
+  ## Write generates:
+  #
+  # sitemap.xml
+  #  That you can reference in your robots.txt like:
+  #   Sitemap: https://yourpage/sitemap.xml
+  #
+  # sitemap_0.xml
+  # sitemap_n.xml
+  #
+  # That contain the actual links, it is splitted based on the "maxUrlsPerSitemap" parameter.
+  #
+  # sitemap_recent.xml
+  # That contains only the recent x entries. Based on the modification date..
   write(pages)
 

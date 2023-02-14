@@ -26,7 +26,7 @@ import simpleSitemap, times
   ## Write generates:
   #
   # sitemap.xml
-  #  That you can reference i your robots.txt like:
+  #  That you can reference in your robots.txt like:
   #   Sitemap: https://yourpage/sitemap.xml
   #
   # sitemap_0.xml
