@@ -42,6 +42,7 @@ func cmpUrlDate(x, y: UrlDate): int =
 
 func generateSitemaps*(urls: seq[UrlDate], urlsOnRecent = 10, maxUrlsPerSitemap = 50_000, base = "https://forum.nim-lang.org/"): seq[Page] =
   ## Generates sitemaps
+  if urls.len == 0: return
   var baseUri = parseUri(base)
   var elemSitemapindex = newElement("sitemapindex")
   elemSitemapindex.attrs = {"xmlns": "http://www.sitemaps.org/schemas/sitemap/0.9"}.toXmlAttributes()
