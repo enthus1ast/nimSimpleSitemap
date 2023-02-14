@@ -77,7 +77,7 @@ func generateSitemaps*(urls: seq[UrlDate], urlsOnRecent = 10, maxUrlsPerSitemap 
   result.add ("sitemap.xml", elemSitemapindex)
 
 
-proc write(pages: seq[Page], folder = getAppDir() / "sitemaps") =
+proc write*(pages: seq[Page], folder = getAppDir() / "sitemaps") =
   if not dirExists(folder):
     createDir(folder)
   for (filename, data) in pages:
